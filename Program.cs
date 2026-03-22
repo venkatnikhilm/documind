@@ -59,6 +59,9 @@ builder.Services.AddSingleton(azureOpenAIConfig);
 builder.Services.AddSingleton(azureSearchConfig);
 builder.Services.AddSingleton(azureBlobConfig);
 
+// Register application services
+builder.Services.AddSingleton<DocuMind.Services.IBlobStorageService, DocuMind.Services.BlobStorageService>();
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
