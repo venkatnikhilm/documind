@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "waazRdnkXg8=",
+  "dgSpecHash": "sxk+Oxz5D8A=",
   "success": true,
   "projectFilePath": "/Users/venkatnikhilm/MyStuff/documind/DocuMind/DocuMind.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,7 @@
     "/Users/venkatnikhilm/.nuget/packages/azure.search.documents/11.7.0/azure.search.documents.11.7.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/azure.storage.blobs/12.27.0/azure.storage.blobs.12.27.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/azure.storage.common/12.26.0/azure.storage.common.12.26.0.nupkg.sha512",
+    "/Users/venkatnikhilm/.nuget/packages/bouncycastle.cryptography/2.4.0/bouncycastle.cryptography.2.4.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/castle.core/5.1.1/castle.core.5.1.1.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/documentformat.openxml/3.2.0/documentformat.openxml.3.2.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/documentformat.openxml.framework/3.2.0/documentformat.openxml.framework.3.2.0.nupkg.sha512",
@@ -16,8 +17,10 @@
     "/Users/venkatnikhilm/.nuget/packages/fscheck.xunit/3.0.1/fscheck.xunit.3.0.1.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/fsharp.core/5.0.2/fsharp.core.5.0.2.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/itext/9.0.0/itext.9.0.0.nupkg.sha512",
+    "/Users/venkatnikhilm/.nuget/packages/itext.bouncy-castle-adapter/9.0.0/itext.bouncy-castle-adapter.9.0.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/itext.commons/9.0.0/itext.commons.9.0.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/itext7/9.0.0/itext7.9.0.0.nupkg.sha512",
+    "/Users/venkatnikhilm/.nuget/packages/itext7.bouncy-castle-adapter/9.0.0/itext7.bouncy-castle-adapter.9.0.0.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/microsoft.aspnetcore.openapi/10.0.5/microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/microsoft.bcl.asyncinterfaces/10.0.2/microsoft.bcl.asyncinterfaces.10.0.2.nupkg.sha512",
     "/Users/venkatnikhilm/.nuget/packages/microsoft.bcl.hashcode/1.1.1/microsoft.bcl.hashcode.1.1.1.nupkg.sha512",

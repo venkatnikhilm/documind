@@ -87,6 +87,19 @@
           }
         }
       },
+      "BouncyCastle.Cryptography/2.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Castle.Core/5.1.1": {
         "type": "package",
         "compile": {
@@ -305,6 +318,23 @@
           }
         }
       },
+      "itext.bouncy-castle-adapter/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.4.0",
+          "itext.commons": "9.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "itext.commons/9.0.0": {
         "type": "package",
         "dependencies": {
@@ -325,6 +355,12 @@
         "type": "package",
         "dependencies": {
           "itext": "9.0.0"
+        }
+      },
+      "itext7.bouncy-castle-adapter/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "itext.bouncy-castle-adapter": "9.0.0"
         }
       },
       "Microsoft.AspNetCore.OpenApi/10.0.5": {
@@ -1240,6 +1276,26 @@
         "lib/netstandard2.0/Azure.Storage.Common.xml"
       ]
     },
+    "BouncyCastle.Cryptography/2.4.0": {
+      "sha512": "SwXsAV3sMvAU/Nn31pbjhWurYSjJ+/giI/0n6tCrYoupEK34iIHCuk3STAd9fx8yudM85KkLSVdn951vTng/vQ==",
+      "type": "package",
+      "path": "bouncycastle.cryptography/2.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "bouncycastle.cryptography.2.4.0.nupkg.sha512",
+        "bouncycastle.cryptography.nuspec",
+        "lib/net461/BouncyCastle.Cryptography.dll",
+        "lib/net461/BouncyCastle.Cryptography.xml",
+        "lib/net6.0/BouncyCastle.Cryptography.dll",
+        "lib/net6.0/BouncyCastle.Cryptography.xml",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
+        "packageIcon.png"
+      ]
+    },
     "Castle.Core/5.1.1": {
       "sha512": "rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
       "type": "package",
@@ -1428,6 +1484,22 @@
         "lib/netstandard2.0/itext.svg.xml"
       ]
     },
+    "itext.bouncy-castle-adapter/9.0.0": {
+      "sha512": "2IcE6/X6YMBr9dgxsSK+934zXqi7UcdsYHapaa+aD7LLHgcbEABzyVNzsTrVEcNO4XJAMLVtqk4MP8dcVNiyQw==",
+      "type": "package",
+      "path": "itext.bouncy-castle-adapter/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ITSC-avatar.png",
+        "itext.bouncy-castle-adapter.9.0.0.nupkg.sha512",
+        "itext.bouncy-castle-adapter.nuspec",
+        "lib/net461/itext.bouncy-castle-adapter.dll",
+        "lib/net461/itext.bouncy-castle-adapter.xml",
+        "lib/netstandard2.0/itext.bouncy-castle-adapter.dll",
+        "lib/netstandard2.0/itext.bouncy-castle-adapter.xml"
+      ]
+    },
     "itext.commons/9.0.0": {
       "sha512": "mfQuZz4beW2GOHMrtGay5iowg6WINBkHMm7hj38el3eDvWY3yLVZGrVxdWVRhEXJIdsXsBa3lPywxspsqi3rxg==",
       "type": "package",
@@ -1456,6 +1528,20 @@
         "gnu-agpl-v3.0.md",
         "itext7.9.0.0.nupkg.sha512",
         "itext7.nuspec"
+      ]
+    },
+    "itext7.bouncy-castle-adapter/9.0.0": {
+      "sha512": "JJccn14lsKhhyevA1rXwahZVtFjkmrB0JybNgxeAenRxkv8fxGX2ToC1BD5Il4vCIU5m2QN/n1LGJ7dehWqc1A==",
+      "type": "package",
+      "path": "itext7.bouncy-castle-adapter/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ITSC-avatar.png",
+        "LICENSE.md",
+        "gnu-agpl-v3.0.md",
+        "itext7.bouncy-castle-adapter.9.0.0.nupkg.sha512",
+        "itext7.bouncy-castle-adapter.nuspec"
       ]
     },
     "Microsoft.AspNetCore.OpenApi/10.0.5": {
@@ -2498,6 +2584,7 @@
       "Moq >= 4.20.72",
       "Polly >= 8.6.6",
       "itext7 >= 9.0.0",
+      "itext7.bouncy-castle-adapter >= 9.0.0",
       "xunit >= 2.9.2",
       "xunit.runner.visualstudio >= 2.8.2"
     ]
@@ -2598,6 +2685,10 @@
             "version": "[8.6.6, )"
           },
           "itext7": {
+            "target": "Package",
+            "version": "[9.0.0, )"
+          },
+          "itext7.bouncy-castle-adapter": {
             "target": "Package",
             "version": "[9.0.0, )"
           },
