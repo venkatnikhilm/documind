@@ -22,6 +22,8 @@ public class EmbeddingService : IEmbeddingService
     private readonly AsyncRetryPolicy _retryPolicy;
     private readonly Tokenizer _tokenizer;
     private const int MaxTokens = 8191; // text-embedding-3-small token limit
+    private const int BatchSize = 16; // Process 16 chunks at a time
+    private const int DelayBetweenBatchesMs = 2000; // 2 second delay between batches
 
     public EmbeddingService(
         AzureOpenAIConfig config,
@@ -97,21 +99,77 @@ public class EmbeddingService : IEmbeddingService
         List<string> texts,
         CancellationToken cancellationToken = default)
     {
+        return await GenerateEmbeddingsBatchWithRateLimitAsync(texts, cancellationToken);
+    }
+
+    /// <summary>
+    /// Generates embeddings for a batch of texts with rate limiting to avoid HTTP 429 errors.
+    /// Processes texts in smaller batches with delays between batches.
+    /// </summary>
+    private async Task<List<float[]>> GenerateEmbeddingsBatchWithRateLimitAsync(
+        List<string> texts,
+        CancellationToken cancellationToken = default)
+    {
         try
         {
             // Truncate texts if needed
             var processedTexts = texts.Select(TruncateIfNeeded).ToList();
+            var allEmbeddings = new List<float[]>();
 
-            return await _retryPolicy.ExecuteAsync(async () =>
+            // Calculate total number of batches
+            var totalBatches = (int)Math.Ceiling((double)processedTexts.Count / BatchSize);
+
+            _logger.LogInformation(
+                "Starting batch embedding generation. TotalChunks: {TotalChunks}, BatchSize: {BatchSize}, TotalBatches: {TotalBatches}",
+                processedTexts.Count,
+                BatchSize,
+                totalBatches);
+
+            // Process texts in batches
+            for (int i = 0; i < processedTexts.Count; i += BatchSize)
             {
-                var embeddingClient = _client.GetEmbeddingClient(_embeddingDeployment);
-                var options = new EmbeddingGenerationOptions();
-                var response = await embeddingClient.GenerateEmbeddingsAsync(processedTexts, options, cancellationToken);
-                
-                return response.Value
-                    .Select(embedding => embedding.ToFloats().ToArray())
-                    .ToList();
-            });
+                var currentBatch = i / BatchSize + 1;
+                var batch = processedTexts.Skip(i).Take(BatchSize).ToList();
+                var startChunk = i + 1;
+                var endChunk = Math.Min(i + BatchSize, processedTexts.Count);
+
+                _logger.LogInformation(
+                    "Processing batch {CurrentBatch} of {TotalBatches} (chunks {StartChunk}-{EndChunk})",
+                    currentBatch,
+                    totalBatches,
+                    startChunk,
+                    endChunk);
+
+                // Generate embeddings for this batch with retry policy
+                var batchEmbeddings = await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    var embeddingClient = _client.GetEmbeddingClient(_embeddingDeployment);
+                    var options = new EmbeddingGenerationOptions();
+                    var response = await embeddingClient.GenerateEmbeddingsAsync(batch, options, cancellationToken);
+                    
+                    return response.Value
+                        .Select(embedding => embedding.ToFloats().ToArray())
+                        .ToList();
+                });
+
+                allEmbeddings.AddRange(batchEmbeddings);
+
+                // Add delay between batches (except after the last batch)
+                if (currentBatch < totalBatches)
+                {
+                    _logger.LogDebug(
+                        "Waiting {DelayMs}ms before processing next batch",
+                        DelayBetweenBatchesMs);
+                    
+                    await Task.Delay(DelayBetweenBatchesMs, cancellationToken);
+                }
+            }
+
+            _logger.LogInformation(
+                "Completed batch embedding generation. TotalEmbeddings: {TotalEmbeddings}",
+                allEmbeddings.Count);
+
+            return allEmbeddings;
         }
         catch (RequestFailedException ex) when (!IsTransientError(ex))
         {

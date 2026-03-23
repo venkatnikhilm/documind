@@ -6,3 +6,5 @@ export { ErrorToast } from './ErrorToast';
 export { LoadingSpinner } from './LoadingSpinner';
 export { UploadPanel } from './UploadPanel';
 export { QueryPanel } from './QueryPanel';
+export { Header } from './Header';
+export { MainLayout } from './MainLayout';

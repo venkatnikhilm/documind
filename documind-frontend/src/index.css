@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Mono', 'Fira Code', ui-monospace, monospace;
+  background-color: #0a0a0a;
+  color: #e5e5e5;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Subtle grid background */
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(200, 240, 96, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 240, 96, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141414;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}

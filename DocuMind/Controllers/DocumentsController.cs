@@ -230,23 +230,45 @@ public class DocumentsController : ControllerBase
             }
 
             // Step 3: Build context from search results
-            var contextBuilder = new StringBuilder();
-            contextBuilder.AppendLine("Use the following document chunks to answer the question:");
-            contextBuilder.AppendLine();
+            // var contextBuilder = new StringBuilder();
+            // contextBuilder.AppendLine("Use the following document chunks to answer the question:");
+            // contextBuilder.AppendLine();
             
+            // for (int i = 0; i < searchResults.Count; i++)
+            // {
+            //     var result = searchResults[i];
+            //     contextBuilder.AppendLine($"[Chunk {i + 1}]");
+            //     contextBuilder.AppendLine($"Document ID: {result.Chunk.DocumentId}");
+            //     contextBuilder.AppendLine($"Chunk ID: {result.Chunk.ChunkId}");
+            //     contextBuilder.AppendLine($"Content: {result.Chunk.Text}");
+            //     contextBuilder.AppendLine();
+            // }
+
+            // contextBuilder.AppendLine($"Question: {request.Question}");
+            var contextBuilder = new StringBuilder();
+            contextBuilder.AppendLine("You are a precise document assistant. Answer the user's question directly and concisely using only the provided document chunks.");
+            contextBuilder.AppendLine("Rules:");
+            contextBuilder.AppendLine("- Answer directly. Do not explain that you are using chunks or reference the chunks by number.");
+            contextBuilder.AppendLine("- If the answer includes a page number or section, mention it naturally in your answer.");
+            contextBuilder.AppendLine("- If the chunks do not contain enough information, say so in one sentence.");
+            contextBuilder.AppendLine("- Do not pad the answer with summaries or conclusions unless asked.");
+            contextBuilder.AppendLine();
+            contextBuilder.AppendLine("Document context:");
+
             for (int i = 0; i < searchResults.Count; i++)
             {
                 var result = searchResults[i];
-                contextBuilder.AppendLine($"[Chunk {i + 1}]");
-                contextBuilder.AppendLine($"Document ID: {result.Chunk.DocumentId}");
-                contextBuilder.AppendLine($"Chunk ID: {result.Chunk.ChunkId}");
-                contextBuilder.AppendLine($"Content: {result.Chunk.Text}");
-                contextBuilder.AppendLine();
+                contextBuilder.AppendLine($"---");
+                contextBuilder.AppendLine(result.Chunk.Text);
             }
 
+            contextBuilder.AppendLine("---");
+            contextBuilder.AppendLine();
             contextBuilder.AppendLine($"Question: {request.Question}");
             contextBuilder.AppendLine();
-            contextBuilder.AppendLine("Please provide a comprehensive answer based on the document chunks above. If the chunks don't contain enough information to fully answer the question, acknowledge this in your response.");
+            // contextBuilder.AppendLine("Please provide a comprehensive answer based on the document chunks above. If the chunks don't contain enough information to fully answer the question, acknowledge this in your response.");
+            
+
 
             var prompt = contextBuilder.ToString();
 

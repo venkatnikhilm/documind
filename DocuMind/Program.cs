@@ -5,6 +5,17 @@ using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // Vite dev server ports
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithExposedHeaders("Content-Type"); // For SSE
+    });
+});
+
 // Configure structured logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -117,6 +128,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
