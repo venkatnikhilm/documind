@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, PropsWithChildren } from 'react';
+import { createContext, useContext, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { Message, Citation } from '../types/message';
 
 interface MessageContextValue {
