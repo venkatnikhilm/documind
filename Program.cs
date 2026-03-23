@@ -61,6 +61,8 @@ builder.Services.AddSingleton(azureBlobConfig);
 
 // Register application services
 builder.Services.AddSingleton<DocuMind.Services.IBlobStorageService, DocuMind.Services.BlobStorageService>();
+builder.Services.AddSingleton<DocuMind.Services.IDocumentProcessingService, DocuMind.Services.DocumentProcessingService>();
+builder.Services.AddSingleton<DocuMind.Services.IEmbeddingService, DocuMind.Services.EmbeddingService>();
 
 // Add services to the container.
 builder.Services.AddControllers();
