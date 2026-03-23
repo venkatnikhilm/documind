@@ -5,3 +5,4 @@ export { MessageBubble } from './MessageBubble';
 export { ErrorToast } from './ErrorToast';
 export { LoadingSpinner } from './LoadingSpinner';
 export { UploadPanel } from './UploadPanel';
+export { QueryPanel } from './QueryPanel';
