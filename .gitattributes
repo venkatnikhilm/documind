@@ -1,2 +1,6 @@
 documind-frontend/** linguist-vendored
+documind-frontend/** linguist-detectable=false
 documind-ui/** linguist-vendored
+documind-ui/** linguist-detectable=false
+*.ts linguist-detectable=false
+*.tsx linguist-detectable=false
