@@ -1,0 +1,16 @@
+# .NET
+DocuMind/bin/
+DocuMind/obj/
+DocuMind/*.user
+
+# Node
+documind-ui/node_modules/
+documind-ui/dist/
+
+# Secrets
+.env
+DocuMind/secrets.json.template
+
+# IDE
+.vscode/
+.kiro/
