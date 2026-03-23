@@ -114,14 +114,6 @@ public class DocumentProcessingServiceTests
             () => _service.ExtractTextAsync(emptyStream, ".docx"));
     }
 
-    [Fact]
-    public async Task ChunkTextAsync_NotImplemented_ThrowsNotImplementedException()
-    {
-        // Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(
-            () => _service.ChunkTextAsync("test", "doc123"));
-    }
-
     // Helper method to create a simple PDF with text
     private static MemoryStream CreateSimplePdf(params string[] paragraphs)
     {

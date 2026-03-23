@@ -175,3 +175,6 @@
 /Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/Moq.dll
 /Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/BouncyCastle.Cryptography.dll
 /Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/itext.bouncy-castle-adapter.dll
+/Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/Google.Protobuf.dll
+/Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/Microsoft.ML.Tokenizers.dll
+/Users/venkatnikhilm/MyStuff/documind/DocuMind/bin/Debug/net10.0/Microsoft.ML.Tokenizers.Data.Cl100kBase.dll

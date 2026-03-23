@@ -6,6 +6,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.Extensions.Logging;
+using Microsoft.ML.Tokenizers;
 using System.Text;
 
 namespace DocuMind.Services;
@@ -70,8 +71,119 @@ public class DocumentProcessingService : IDocumentProcessingService
         int maxTokens = 500, 
         int overlapTokens = 50)
     {
-        // This will be implemented in task 3.4
-        throw new NotImplementedException("ChunkTextAsync will be implemented in task 3.4");
+        try
+        {
+            // Handle empty or null text
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return Task.FromResult(new List<DocumentChunk>());
+            }
+
+            // Create tokenizer using cl100k_base encoding (used by text-embedding-3-small)
+            var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
+            
+            // Encode the entire text to get token IDs
+            var allTokenIds = tokenizer.EncodeToIds(text);
+            
+            // If text is shorter than maxTokens, return single chunk
+            if (allTokenIds.Count <= maxTokens)
+            {
+                var chunk = new DocumentChunk
+                {
+                    ChunkId = Guid.NewGuid().ToString(),
+                    DocumentId = documentId,
+                    Text = text,
+                    ChunkIndex = 0,
+                    StartPosition = 0,
+                    EndPosition = text.Length
+                };
+                
+                _logger.LogInformation(
+                    "Text chunked into 1 chunk for document {DocumentId}. Total tokens: {TokenCount}",
+                    documentId, allTokenIds.Count);
+                
+                return Task.FromResult(new List<DocumentChunk> { chunk });
+            }
+
+            // Split into chunks with overlap
+            var chunks = new List<DocumentChunk>();
+            int chunkIndex = 0;
+            int currentTokenPosition = 0;
+
+            while (currentTokenPosition < allTokenIds.Count)
+            {
+                // Determine the end position for this chunk
+                int endTokenPosition = Math.Min(currentTokenPosition + maxTokens, allTokenIds.Count);
+                
+                // Extract token IDs for this chunk
+                var chunkTokenIds = allTokenIds.Skip(currentTokenPosition).Take(endTokenPosition - currentTokenPosition).ToList();
+                
+                // Decode tokens back to text
+                string chunkText = tokenizer.Decode(chunkTokenIds);
+                
+                // Calculate character positions in the original text
+                // We need to find where this chunk starts and ends in the original text
+                int startCharPosition = GetCharacterPosition(tokenizer, allTokenIds, currentTokenPosition);
+                int endCharPosition = GetCharacterPosition(tokenizer, allTokenIds, endTokenPosition);
+                
+                var chunk = new DocumentChunk
+                {
+                    ChunkId = Guid.NewGuid().ToString(),
+                    DocumentId = documentId,
+                    Text = chunkText,
+                    ChunkIndex = chunkIndex,
+                    StartPosition = startCharPosition,
+                    EndPosition = endCharPosition
+                };
+                
+                chunks.Add(chunk);
+                chunkIndex++;
+                
+                // Move to next chunk position with overlap
+                // If this is the last chunk, we're done
+                if (endTokenPosition >= allTokenIds.Count)
+                {
+                    break;
+                }
+                
+                // Move forward by (maxTokens - overlapTokens) to create overlap
+                currentTokenPosition += (maxTokens - overlapTokens);
+            }
+
+            _logger.LogInformation(
+                "Text chunked into {ChunkCount} chunks for document {DocumentId}. Total tokens: {TokenCount}",
+                chunks.Count, documentId, allTokenIds.Count);
+
+            return Task.FromResult(chunks);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error chunking text for document {DocumentId}", documentId);
+            throw new ProcessingException("Failed to chunk text.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Gets the character position in the original text for a given token position.
+    /// </summary>
+    private int GetCharacterPosition(Tokenizer tokenizer, IReadOnlyList<int> allTokenIds, int tokenPosition)
+    {
+        if (tokenPosition == 0)
+        {
+            return 0;
+        }
+        
+        if (tokenPosition >= allTokenIds.Count)
+        {
+            // Decode all tokens to get the full text length
+            var fullText = tokenizer.Decode(allTokenIds);
+            return fullText.Length;
+        }
+        
+        // Decode tokens up to this position to get character position
+        var tokensUpToPosition = allTokenIds.Take(tokenPosition).ToList();
+        var textUpToPosition = tokenizer.Decode(tokensUpToPosition);
+        return textUpToPosition.Length;
     }
 
     /// <summary>

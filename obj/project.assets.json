@@ -240,6 +240,19 @@
           }
         }
       },
+      "Google.Protobuf/3.27.1": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/Google.Protobuf.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Google.Protobuf.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "itext/9.0.0": {
         "type": "package",
         "dependencies": {
@@ -536,6 +549,38 @@
         },
         "runtime": {
           "lib/net10.0/Microsoft.Extensions.VectorData.Abstractions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.ML.Tokenizers/1.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Google.Protobuf": "3.27.1"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.ML.Tokenizers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.ML.Tokenizers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.ML.Tokenizers.Data.Cl100kBase/1.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.ML.Tokenizers": "1.0.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.ML.Tokenizers.Data.Cl100kBase.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.ML.Tokenizers.Data.Cl100kBase.dll": {
             "related": ".xml"
           }
         }
@@ -1426,6 +1471,29 @@
         "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll"
       ]
     },
+    "Google.Protobuf/3.27.1": {
+      "sha512": "7IVz9TzhYCZ8qY0rPhXUnyJSXYdshUqmmxmTI763XmDDSJJFnyfKH43FFcMJu/CZgBcE98xlFztrKwhzcRkiPg==",
+      "type": "package",
+      "path": "google.protobuf/3.27.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "google.protobuf.3.27.1.nupkg.sha512",
+        "google.protobuf.nuspec",
+        "lib/net45/Google.Protobuf.dll",
+        "lib/net45/Google.Protobuf.pdb",
+        "lib/net45/Google.Protobuf.xml",
+        "lib/net5.0/Google.Protobuf.dll",
+        "lib/net5.0/Google.Protobuf.pdb",
+        "lib/net5.0/Google.Protobuf.xml",
+        "lib/netstandard1.1/Google.Protobuf.dll",
+        "lib/netstandard1.1/Google.Protobuf.pdb",
+        "lib/netstandard1.1/Google.Protobuf.xml",
+        "lib/netstandard2.0/Google.Protobuf.dll",
+        "lib/netstandard2.0/Google.Protobuf.pdb",
+        "lib/netstandard2.0/Google.Protobuf.xml"
+      ]
+    },
     "itext/9.0.0": {
       "sha512": "Y2nDUrXDO7eZ+dI2NZ10apW818OcgGklMWpLrVZ/P16rwSxpVyzjWZQjCgZVj8liSVhVDHy6eVJOrZah5KNhhQ==",
       "type": "package",
@@ -1845,6 +1913,42 @@
         "microsoft.extensions.vectordata.abstractions.10.1.0.nupkg.sha512",
         "microsoft.extensions.vectordata.abstractions.nuspec",
         "neticon.png"
+      ]
+    },
+    "Microsoft.ML.Tokenizers/1.0.2": {
+      "sha512": "MefL5+IakSE/CWzx4BQQairgY1fXFBVTPtnn7/01Wngsk2248loViqQ1M5+YB8KBwbi0HjcfoMo86h+cSjiEOA==",
+      "type": "package",
+      "path": "microsoft.ml.tokenizers/1.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net8.0/Microsoft.ML.Tokenizers.dll",
+        "lib/net8.0/Microsoft.ML.Tokenizers.xml",
+        "lib/netstandard2.0/Microsoft.ML.Tokenizers.dll",
+        "lib/netstandard2.0/Microsoft.ML.Tokenizers.xml",
+        "microsoft.ml.tokenizers.1.0.2.nupkg.sha512",
+        "microsoft.ml.tokenizers.nuspec",
+        "mlnetlogo.png"
+      ]
+    },
+    "Microsoft.ML.Tokenizers.Data.Cl100kBase/1.0.2": {
+      "sha512": "j7aVyeZMS7AqzHHz1JQ+11U5DHLS9EuqsqQ1n66w5HF78SKJNj4CKgFouU/0T4BJjZFzTBUZYJGg6HMOlTeBiQ==",
+      "type": "package",
+      "path": "microsoft.ml.tokenizers.data.cl100kbase/1.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard2.0/Microsoft.ML.Tokenizers.Data.Cl100kBase.dll",
+        "lib/netstandard2.0/Microsoft.ML.Tokenizers.Data.Cl100kBase.xml",
+        "microsoft.ml.tokenizers.data.cl100kbase.1.0.2.nupkg.sha512",
+        "microsoft.ml.tokenizers.data.cl100kbase.nuspec",
+        "mlnetlogo.png"
       ]
     },
     "Microsoft.NET.Test.Sdk/17.12.0": {
@@ -2578,6 +2682,8 @@
       "Microsoft.AspNetCore.OpenApi >= 10.0.5",
       "Microsoft.Extensions.Configuration.UserSecrets >= 10.0.5",
       "Microsoft.Extensions.Http.Polly >= 10.0.5",
+      "Microsoft.ML.Tokenizers >= 1.0.2",
+      "Microsoft.ML.Tokenizers.Data.Cl100kBase >= 1.0.2",
       "Microsoft.NET.Test.Sdk >= 17.12.0",
       "Microsoft.SemanticKernel >= 1.74.0",
       "Microsoft.SemanticKernel.Connectors.AzureOpenAI >= 1.74.0",
@@ -2663,6 +2769,14 @@
           "Microsoft.Extensions.Http.Polly": {
             "target": "Package",
             "version": "[10.0.5, )"
+          },
+          "Microsoft.ML.Tokenizers": {
+            "target": "Package",
+            "version": "[1.0.2, )"
+          },
+          "Microsoft.ML.Tokenizers.Data.Cl100kBase": {
+            "target": "Package",
+            "version": "[1.0.2, )"
           },
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",

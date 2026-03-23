@@ -76,6 +76,14 @@
               "target": "Package",
               "version": "[10.0.5, )"
             },
+            "Microsoft.ML.Tokenizers": {
+              "target": "Package",
+              "version": "[1.0.2, )"
+            },
+            "Microsoft.ML.Tokenizers.Data.Cl100kBase": {
+              "target": "Package",
+              "version": "[1.0.2, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.12.0, )"
