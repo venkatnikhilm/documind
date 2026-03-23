@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DocuMind")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b5ae86a9270a82eb6e31e309a907ae0d6a3966e8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f6b72cd717c84e2ef635f1441e16b6b85328024d")]
 [assembly: System.Reflection.AssemblyProductAttribute("DocuMind")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DocuMind")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

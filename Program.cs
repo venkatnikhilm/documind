@@ -1,6 +1,17 @@
 using DocuMind.Models;
+using DocuMind.Plugins;
+using Microsoft.SemanticKernel;
+using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure structured logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+// Set logging levels from configuration
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
 // Configure User Secrets and configuration
 // User Secrets are automatically loaded in Development environment
@@ -63,6 +74,42 @@ builder.Services.AddSingleton(azureBlobConfig);
 builder.Services.AddSingleton<DocuMind.Services.IBlobStorageService, DocuMind.Services.BlobStorageService>();
 builder.Services.AddSingleton<DocuMind.Services.IDocumentProcessingService, DocuMind.Services.DocumentProcessingService>();
 builder.Services.AddSingleton<DocuMind.Services.IEmbeddingService, DocuMind.Services.EmbeddingService>();
+builder.Services.AddSingleton<DocuMind.Services.ISearchService, DocuMind.Services.SearchService>();
+
+// Configure Semantic Kernel with Azure OpenAI
+var kernelBuilder = Kernel.CreateBuilder();
+kernelBuilder.AddAzureOpenAIChatCompletion(
+    deploymentName: azureOpenAIConfig.GptDeployment,
+    endpoint: azureOpenAIConfig.Endpoint,
+    apiKey: azureOpenAIConfig.Key);
+
+var kernel = kernelBuilder.Build();
+
+// Register Semantic Kernel as a singleton
+builder.Services.AddSingleton(kernel);
+
+// Register plugins with dependency injection
+builder.Services.AddSingleton<SearchPlugin>();
+builder.Services.AddSingleton<SummarizePlugin>();
+
+// Configure HTTP logging middleware
+builder.Services.AddHttpLogging(logging =>
+{
+    // Log request and response information
+    logging.LoggingFields = HttpLoggingFields.RequestPath
+                          | HttpLoggingFields.RequestMethod
+                          | HttpLoggingFields.RequestQuery
+                          | HttpLoggingFields.ResponseStatusCode
+                          | HttpLoggingFields.Duration;
+    
+    // Set request body logging limit (in bytes)
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+    
+    // Configure media types to log
+    logging.MediaTypeOptions.AddText("application/json");
+    logging.MediaTypeOptions.AddText("multipart/form-data");
+});
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -76,6 +123,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Add HTTP logging middleware
+app.UseHttpLogging();
 
 app.UseHttpsRedirection();
 

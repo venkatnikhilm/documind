@@ -1,4 +1,4 @@
-namespace DocuMind.Services;
+namespace DocuMind.Exceptions;
 
 /// <summary>
 /// Exception thrown when an external Azure service is unavailable.

@@ -1,3 +1,4 @@
+using DocuMind.Exceptions;
 using Azure;
 using Azure.AI.OpenAI;
 using DocuMind.Models;
