@@ -41,6 +41,7 @@ def init_nodes(
         azure_endpoint=config.azure_openai_endpoint,
         api_key=config.azure_openai_key,
         azure_deployment=config.azure_openai_gpt_deployment,
+        api_version="2024-12-01-preview",
         temperature=0,
     )
 
@@ -258,4 +259,5 @@ async def generator_node(state: RAGState) -> dict:
         "answer": answer,
         "citations": citations,
         "is_grounded": is_grounded,
+        "generation_count": state.get("generation_count", 0) + 1,
     }

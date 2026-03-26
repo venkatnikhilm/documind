@@ -16,3 +16,4 @@ class RAGState(TypedDict):
     retry_count: int
     is_grounded: bool
     query_type: str
+    generation_count: int

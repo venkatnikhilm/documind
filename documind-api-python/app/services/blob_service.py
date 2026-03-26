@@ -8,6 +8,7 @@ from azure.core.exceptions import HttpResponseError
 from azure.storage.blob.aio import BlobServiceClient, ContainerClient
 
 from app.config import Config
+from app.exceptions import ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class BlobService:
                     exc.status_code,
                     exc.message,
                 )
-                raise RuntimeError(
+                raise ServiceUnavailableError(
                     "Azure Blob Storage service is currently unavailable."
                 ) from exc
             logger.error(
@@ -84,7 +85,7 @@ class BlobService:
                 exc.error_code,
                 exc.message,
             )
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 f"Failed to upload document to blob storage: {exc.message}"
             ) from exc
         except Exception as exc:
@@ -107,7 +108,7 @@ class BlobService:
             return True
         except Exception as exc:
             logger.error("Blob storage health check failed: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure Blob Storage is unreachable."
             ) from exc
 

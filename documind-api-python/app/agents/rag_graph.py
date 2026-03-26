@@ -39,11 +39,8 @@ def _groundedness_decision(state: RAGState) -> str:
     """Route after generation: end if grounded, regenerate once if not."""
     if state.get("is_grounded", False):
         return "end"
-    # Allow one regeneration attempt — check if answer already exists
-    # (meaning we already generated once and it wasn't grounded).
-    # We use a simple heuristic: if retry_count for generation hasn't been
-    # tracked separately, we piggy-back on the fact that the graph will only
-    # loop back to generator once via this edge.
+    if state.get("generation_count", 0) >= 2:
+        return "end"
     return "regenerate"
 
 

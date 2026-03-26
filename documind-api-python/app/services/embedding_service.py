@@ -6,6 +6,7 @@ import logging
 from langchain_openai import AzureOpenAIEmbeddings
 
 from app.config import Config
+from app.exceptions import ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class EmbeddingService:
             azure_endpoint=config.azure_openai_endpoint,
             api_key=config.azure_openai_key,
             azure_deployment=config.azure_openai_embedding_deployment,
+            api_version="2024-12-01-preview",
         )
 
     async def generate_embedding(self, text: str) -> list[float]:
@@ -40,7 +42,7 @@ class EmbeddingService:
             return vector
         except Exception as exc:
             logger.error("Embedding generation failed: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure OpenAI embedding service is currently unavailable."
             ) from exc
 
@@ -81,6 +83,25 @@ class EmbeddingService:
             return all_embeddings
         except Exception as exc:
             logger.error("Batch embedding generation failed: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure OpenAI embedding service is currently unavailable."
             ) from exc
+
+    async def check_health(self) -> bool:
+        """Verify connectivity to Azure OpenAI embedding service.
+
+        Returns:
+            True if the service is reachable.
+
+        Raises:
+            ServiceUnavailableError: When Azure OpenAI is unreachable.
+        """
+        try:
+            await self.embeddings.aembed_query("health check")
+            return True
+        except Exception as exc:
+            logger.error("OpenAI health check failed: %s", exc)
+            raise ServiceUnavailableError(
+                "Azure OpenAI is unreachable."
+            ) from exc
+

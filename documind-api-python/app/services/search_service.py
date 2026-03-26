@@ -19,6 +19,7 @@ from azure.search.documents.indexes.models import (
 from azure.search.documents.models import VectorizedQuery
 
 from app.config import Config
+from app.exceptions import ServiceUnavailableError
 from app.models import DocumentChunk, SearchResult
 
 logger = logging.getLogger(__name__)
@@ -63,7 +64,7 @@ class SearchService:
             logger.error(
                 "Failed to check index '%s': %s", self._index_name, exc
             )
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure AI Search service is currently unavailable."
             ) from exc
 
@@ -129,7 +130,7 @@ class SearchService:
             logger.error(
                 "Failed to create index '%s': %s", self._index_name, exc
             )
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure AI Search service is currently unavailable."
             ) from exc
 
@@ -168,7 +169,7 @@ class SearchService:
             )
         except Exception as exc:
             logger.error("Failed to index chunks: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure AI Search service is currently unavailable."
             ) from exc
 
@@ -235,7 +236,7 @@ class SearchService:
             return results
         except Exception as exc:
             logger.error("Vector search failed: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure AI Search service is currently unavailable."
             ) from exc
 
@@ -254,6 +255,6 @@ class SearchService:
             return True
         except Exception as exc:
             logger.error("Search service health check failed: %s", exc)
-            raise RuntimeError(
+            raise ServiceUnavailableError(
                 "Azure AI Search is unreachable."
             ) from exc
