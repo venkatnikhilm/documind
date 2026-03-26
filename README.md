@@ -8,6 +8,10 @@ DocuMind is a full-stack application that transforms how you interact with docum
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)](https://react.dev/)
 [![Azure](https://img.shields.io/badge/Azure-OpenAI-0078D4?logo=microsoft-azure)](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?logo=langchain)](https://www.langchain.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-0.4-FF6F00)](https://langchain-ai.github.io/langgraph/)
 
 ---
 
@@ -20,6 +24,7 @@ DocuMind is a full-stack application that transforms how you interact with docum
 - ⚡ **Real-Time Streaming** - Server-Sent Events (SSE) deliver responses as they're generated
 - 🎯 **Document Filtering** - Target specific documents or search across your entire library
 - 🎨 **Modern UI** - Responsive React interface with Tailwind CSS and dark theme
+- 🧩 **Agentic RAG Pipeline** (Python) - LangGraph state machine with query routing, relevance grading, question rewriting, and groundedness checking
 - 🛡️ **Production-Ready** - Comprehensive error handling, retry logic, and rate limiting
 
 ---
@@ -76,6 +81,23 @@ DocuMind implements a **Retrieval-Augmented Generation (RAG)** pipeline:
 └─────────────────┘
 ```
 
+### LangGraph Agentic RAG Pipeline (Python Backend)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Router: question + optional document_id
+    Router --> Retriever: classify simple/complex
+    Retriever --> Grader: top 5 chunks
+    Grader --> Generator: avg relevance >= 3
+    Grader --> Retriever: avg < 3, retry < 2 (rewrite question)
+    Grader --> Generator: avg < 3, retry >= 2 (proceed anyway)
+    Generator --> [*]: grounded
+    Generator --> Generator: not grounded (1 retry)
+    Generator --> [*]: not grounded + already retried
+```
+
+The Python backend introduces an agentic RAG pipeline using LangGraph. Instead of a simple retrieve-and-generate flow, queries pass through four nodes with conditional routing, automatic question rewriting on low relevance, and groundedness verification.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -94,6 +116,15 @@ DocuMind implements a **Retrieval-Augmented Generation (RAG)** pipeline:
 - **Resilience**: Polly 8.6.6 (retry logic and circuit breakers)
 - **Testing**: xUnit 2.9.2, FsCheck 3.0.1, Moq 4.20.72
 
+### Python Backend (`documind-api-python/`)
+- **Framework**: FastAPI with uvicorn
+- **AI Orchestration**: LangChain (LCEL) + LangGraph
+- **LLM Chains**: ChatPromptTemplate | AzureChatOpenAI | StrOutputParser
+- **State Machine**: LangGraph StateGraph with conditional edges
+- **Azure Services**: Same as C# backend (Azure OpenAI, Azure AI Search, Azure Blob Storage)
+- **Document Processing**: pypdf (PDF), python-docx (DOCX), tiktoken (chunking)
+- **Async**: Full async/await with aiohttp for Azure SDK
+
 ### Frontend (`documind-ui/`)
 - **Framework**: React 19.2 with TypeScript 5.9
 - **Build Tool**: Vite 8.0
@@ -103,9 +134,29 @@ DocuMind implements a **Retrieval-Augmented Generation (RAG)** pipeline:
 
 ---
 
+## 🔄 Backend Comparison
+
+| Feature | C# Backend | Python Backend |
+|---------|-----------|----------------|
+| Framework | ASP.NET Core 10.0 | FastAPI |
+| AI Orchestration | Semantic Kernel | LangChain LCEL + LangGraph |
+| RAG Approach | Simple retrieve → generate | Agentic: route → retrieve → grade → generate |
+| Query Routing | None | GPT-4o classifies simple/complex |
+| Relevance Grading | None | Per-chunk scoring (1-5), auto-retry on low scores |
+| Question Rewriting | None | Automatic rewrite on low relevance (up to 2 retries) |
+| Groundedness Check | None | Post-generation verification with 1 regeneration attempt |
+| Streaming | SSE via ASP.NET | SSE via FastAPI StreamingResponse |
+| Error Handling | Middleware + Polly retry | Global exception handlers + ServiceUnavailableError |
+| Port | 5161 | 8000 |
+
+Both backends connect to the same Azure services and serve the same React frontend via identical SSE streaming protocols. The Python backend adds intelligence to the query pipeline — it doesn't just retrieve and generate, it evaluates whether the retrieved context is relevant enough, rewrites vague questions, and verifies the answer is grounded in the source material before returning it.
+
+---
+
 ## 📋 Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Python 3.11+](https://www.python.org/downloads/) (for Python backend)
 - [Node.js 18+](https://nodejs.org/) and npm
 - [Azure Subscription](https://azure.microsoft.com/free/students/) (Student or Free Tier)
 - Azure Services:
@@ -167,6 +218,37 @@ dotnet run
 
 The API will start at `https://localhost:7777` and `http://localhost:5000`.
 
+### 2b. Python Backend Setup (Alternative)
+
+```bash
+cd documind-api-python
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Create a `.env` file with:
+
+```
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_KEY=your-key
+AZURE_OPENAI_GPT_DEPLOYMENT=gpt-4o
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
+AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
+AZURE_SEARCH_KEY=your-key
+AZURE_SEARCH_INDEX_NAME=documind-index-python
+AZURE_BLOB_CONNECTION_STRING=your-connection-string
+AZURE_BLOB_CONTAINER=documents
+```
+
+Run:
+
+```bash
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+The API will start at `http://localhost:8000`.
+
 ### 3. Frontend Setup
 
 #### Install Dependencies
@@ -178,7 +260,9 @@ npm install
 
 #### Configure Environment (Optional)
 
-The frontend is pre-configured to proxy API requests to `http://localhost:5000`. If you need to change this, edit `vite.config.ts`:
+The frontend is pre-configured to proxy API requests to `http://localhost:5000`. If you need to change this, edit `vite.config.ts`.
+
+The frontend proxy is configured in `vite.config.ts`. Set the target to `http://localhost:5161` for the C# backend or `http://localhost:8000` for the Python backend.
 
 ```typescript
 server: {
@@ -346,6 +430,27 @@ documind/
 │   ├── tailwind.config.js
 │   └── package.json
 │
+├── documind-api-python/               # Python Backend API
+│   ├── main.py                        # FastAPI app entry point
+│   ├── app/
+│   │   ├── config.py                  # Environment config
+│   │   ├── models.py                  # Pydantic models
+│   │   ├── exceptions.py             # Custom exceptions
+│   │   ├── routers/
+│   │   │   ├── documents.py          # Upload & query endpoints
+│   │   │   └── health.py             # Health check
+│   │   ├── services/
+│   │   │   ├── blob_service.py       # Azure Blob Storage
+│   │   │   ├── document_service.py   # Text extraction & chunking
+│   │   │   ├── embedding_service.py  # Azure OpenAI embeddings
+│   │   │   └── search_service.py     # Azure AI Search
+│   │   └── agents/
+│   │       ├── state.py              # RAGState TypedDict
+│   │       ├── nodes.py              # Router, Retriever, Grader, Generator
+│   │       └── rag_graph.py          # LangGraph StateGraph assembly
+│   ├── requirements.txt
+│   └── .env.example
+│
 └── README.md                      # This file
 ```
 
@@ -478,6 +583,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Azure AI Search** - Vector search capabilities
 - **iText7** - PDF text extraction
 - **React & Vite** - Modern frontend tooling
+- **LangChain** - LLM application framework for Python
+- **LangGraph** - Agentic state machine orchestration
+- **FastAPI** - High-performance Python web framework
 
 ---
 
