@@ -5,6 +5,7 @@ state update dict.  All LLM interactions use LCEL chains
 (ChatPromptTemplate | AzureChatOpenAI) — no deprecated APIs.
 """
 
+import asyncio
 import logging
 
 from langchain_core.output_parsers import StrOutputParser
@@ -25,6 +26,19 @@ _config: Config | None = None
 _search_service: SearchService | None = None
 _embedding_service: EmbeddingService | None = None
 _llm: AzureChatOpenAI | None = None
+_status_queue: asyncio.Queue | None = None
+
+
+def set_status_queue(queue: asyncio.Queue | None) -> None:
+    """Set (or clear) the module-level status queue used by ``_emit``."""
+    global _status_queue  # noqa: PLW0603
+    _status_queue = queue
+
+
+async def _emit(node: str, message: str, detail: str | None = None) -> None:
+    """Push a status payload onto the queue when one is configured."""
+    if _status_queue is not None:
+        await _status_queue.put({"node": node, "message": message, "detail": detail})
 
 
 def init_nodes(

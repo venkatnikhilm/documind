@@ -1,6 +1,18 @@
 """Pydantic request/response models for DocuMind API."""
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class StatusEvent(BaseModel):
+    """A pipeline status event emitted by a LangGraph node."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    node: Literal["router", "retriever", "grader", "generator"]
+    message: str
+    detail: str | None = None
 
 
 class QueryRequest(BaseModel):
