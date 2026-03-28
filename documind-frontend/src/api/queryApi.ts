@@ -1,10 +1,11 @@
-import type { QueryRequest, Citation } from '../types';
+import type { QueryRequest, Citation, StatusEvent } from '../types';
 
 interface QueryCallbacks {
   onToken: (content: string) => void;
   onCitation: (citation: Citation) => void;
   onComplete: () => void;
   onError: (error: string) => void;
+  onStatus: (event: StatusEvent) => void;
 }
 
 export async function sendQuery(
@@ -56,7 +57,13 @@ export async function sendQuery(
           try {
             const parsed = JSON.parse(data);
 
-            if (currentEvent === 'token') {
+            if (currentEvent === 'status') {
+              callbacks.onStatus({
+                node: parsed.node,
+                message: parsed.message,
+                detail: parsed.detail ?? null,
+              });
+            } else if (currentEvent === 'token') {
               callbacks.onToken(parsed.content);
             } else if (currentEvent === 'citation') {
               callbacks.onCitation({

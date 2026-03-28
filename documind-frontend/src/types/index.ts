@@ -35,3 +35,18 @@ export interface UploadProgress {
   total: number;
   percentage: number;
 }
+
+export interface StatusEvent {
+  node: 'router' | 'retriever' | 'grader' | 'generator';
+  message: string;
+  detail: string | null;
+}
+
+export type StageState = 'pending' | 'active' | 'completed' | 'error';
+
+export interface PipelineStage {
+  node: string;
+  label: string;
+  state: StageState;
+  detail: string | null;
+}

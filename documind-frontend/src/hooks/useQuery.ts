@@ -58,6 +58,9 @@ export function useQuery(): UseQueryReturn {
             // If we already have some content, keep it and add error indicator
             addErrorMessage(error);
           },
+          onStatus: () => {
+            // Pipeline status handling will be wired in task 5
+          },
         },
         abortControllerRef.current
       );
