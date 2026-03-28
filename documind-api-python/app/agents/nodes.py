@@ -87,12 +87,14 @@ _ROUTER_PROMPT = ChatPromptTemplate.from_messages(
 
 async def router_node(state: RAGState) -> dict:
     """Classify the incoming question as *simple* or *complex*."""
+    await _emit("router", "Analyzing query complexity...")
     chain = _ROUTER_PROMPT | _get_llm() | StrOutputParser()
     raw = await chain.ainvoke({"question": state["question"]})
     query_type = raw.strip().lower()
     if query_type not in ("simple", "complex"):
         query_type = "complex"
     logger.info("Router classified question as '%s'.", query_type)
+    await _emit("router", "Query classified", query_type)
     return {"query_type": query_type}
 
 
@@ -107,6 +109,12 @@ async def retriever_node(state: RAGState) -> dict:
         raise RuntimeError("Nodes not initialised — call init_nodes() first.")
 
     question = state.get("rewritten_question") or state["question"]
+
+    if state.get("retry_count", 0) > 0:
+        await _emit("retriever", "Retrying with rewritten query...", question)
+    else:
+        await _emit("retriever", "Searching document chunks...")
+
     query_embedding = await _embedding_service.generate_embedding(question)
     results = await _search_service.search(
         query_embedding=query_embedding,
@@ -114,6 +122,7 @@ async def retriever_node(state: RAGState) -> dict:
         document_id=state.get("document_id"),
     )
     logger.info("Retriever fetched %d chunks.", len(results))
+    await _emit("retriever", "Retrieved top 5 chunks")
     return {"retrieved_chunks": results}
 
 
@@ -153,6 +162,7 @@ _REWRITE_PROMPT = ChatPromptTemplate.from_messages(
 
 async def grader_node(state: RAGState) -> dict:
     """Score each retrieved chunk and decide whether to retry retrieval."""
+    await _emit("grader", "Grading relevance of retrieved chunks...")
     llm = _get_llm()
     grade_chain = _GRADER_PROMPT | llm | StrOutputParser()
     rewrite_chain = _REWRITE_PROMPT | llm | StrOutputParser()
@@ -183,6 +193,7 @@ async def grader_node(state: RAGState) -> dict:
     )
 
     if avg_score < 3 and retry_count < 2:
+        await _emit("grader", "Low relevance — rewriting query", f"score: {avg_score:.1f}/5")
         rewritten = await rewrite_chain.ainvoke({"question": question})
         logger.info("Grader rewriting question: '%s'", rewritten.strip())
         return {
@@ -191,6 +202,7 @@ async def grader_node(state: RAGState) -> dict:
             "retry_count": retry_count + 1,
         }
 
+    await _emit("grader", "Relevance check passed", f"score: {avg_score:.1f}/5")
     return {"relevance_scores": scores}
 
 
@@ -233,6 +245,7 @@ _GROUNDEDNESS_PROMPT = ChatPromptTemplate.from_messages(
 
 async def generator_node(state: RAGState) -> dict:
     """Generate an answer from retrieved chunks and check groundedness."""
+    await _emit("generator", "Generating answer...")
     llm = _get_llm()
     gen_chain = _GENERATOR_PROMPT | llm | StrOutputParser()
     ground_chain = _GROUNDEDNESS_PROMPT | llm | StrOutputParser()
@@ -263,11 +276,17 @@ async def generator_node(state: RAGState) -> dict:
     ]
 
     # Check groundedness
+    await _emit("generator", "Verifying answer groundedness...")
     ground_raw = await ground_chain.ainvoke(
         {"context": context, "answer": answer}
     )
     is_grounded = "grounded" in ground_raw.strip().lower()
     logger.info("Groundedness check: %s", "grounded" if is_grounded else "hallucinated")
+
+    if is_grounded:
+        await _emit("generator", "Answer verified", "grounded")
+    else:
+        await _emit("generator", "Regenerating with stricter grounding...")
 
     return {
         "answer": answer,
