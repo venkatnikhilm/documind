@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.models import ErrorResponse, QueryRequest, UploadResponse
 from app.exceptions import ServiceUnavailableError
+from app.agents.nodes import set_status_queue
 from app.services.blob_service import BlobService
 from app.services.document_service import DocumentService
 from app.services.embedding_service import EmbeddingService
@@ -121,6 +122,8 @@ async def query_document(request: QueryRequest):
         )
 
     async def event_stream() -> AsyncGenerator[str, None]:
+        status_queue: asyncio.Queue = asyncio.Queue()
+        set_status_queue(status_queue)
         try:
             result = await _rag_graph.ainvoke(
                 {
@@ -137,6 +140,10 @@ async def query_document(request: QueryRequest):
                     "generation_count": 0,
                 }
             )
+
+            # Drain status events first (before any token events)
+            while not status_queue.empty():
+                yield _sse_event("status", status_queue.get_nowait())
 
             answer = result.get("answer", "")
             words = answer.split()
@@ -162,6 +169,8 @@ async def query_document(request: QueryRequest):
         except Exception as e:
             logger.exception("Error during query streaming")
             yield _sse_event("error", {"error": type(e).__name__, "message": str(e)})
+        finally:
+            set_status_queue(None)
 
     return StreamingResponse(
         event_stream(),
