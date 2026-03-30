@@ -124,34 +124,59 @@ async def query_document(request: QueryRequest):
     async def event_stream() -> AsyncGenerator[str, None]:
         status_queue: asyncio.Queue = asyncio.Queue()
         set_status_queue(status_queue)
+        # Sentinel value pushed onto the queue when the graph finishes
+        _DONE = object()
+        graph_result: dict = {}
+        graph_error: Exception | None = None
+
+        async def _run_graph() -> None:
+            nonlocal graph_result, graph_error
+            try:
+                graph_result = await _rag_graph.ainvoke(
+                    {
+                        "question": request.question,
+                        "document_id": request.document_id,
+                        "retry_count": 0,
+                        "is_grounded": False,
+                        "retrieved_chunks": [],
+                        "relevance_scores": [],
+                        "answer": "",
+                        "citations": [],
+                        "query_type": "",
+                        "rewritten_question": None,
+                        "generation_count": 0,
+                    }
+                )
+            except Exception as e:
+                graph_error = e
+            finally:
+                await status_queue.put(_DONE)
+
         try:
-            result = await _rag_graph.ainvoke(
-                {
-                    "question": request.question,
-                    "document_id": request.document_id,
-                    "retry_count": 0,
-                    "is_grounded": False,
-                    "retrieved_chunks": [],
-                    "relevance_scores": [],
-                    "answer": "",
-                    "citations": [],
-                    "query_type": "",
-                    "rewritten_question": None,
-                    "generation_count": 0,
-                }
-            )
+            # Run the graph in the background so we can stream status events live
+            graph_task = asyncio.create_task(_run_graph())
 
-            # Drain status events first (before any token events)
-            while not status_queue.empty():
-                yield _sse_event("status", status_queue.get_nowait())
+            # Yield status events in real-time as nodes push them onto the queue
+            while True:
+                item = await status_queue.get()
+                if item is _DONE:
+                    break
+                yield _sse_event("status", item)
 
-            answer = result.get("answer", "")
+            # Wait for the task to fully complete (should already be done)
+            await graph_task
+
+            if graph_error is not None:
+                raise graph_error
+
+            # Now stream the answer tokens
+            answer = graph_result.get("answer", "")
             words = answer.split()
             for i, word in enumerate(words):
                 content = word if i == len(words) - 1 else f"{word} "
                 yield _sse_event("token", {"content": content})
 
-            for citation in result.get("citations", []):
+            for citation in graph_result.get("citations", []):
                 yield _sse_event(
                     "citation",
                     {

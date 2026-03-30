@@ -1,8 +1,21 @@
+import { useEffect, useRef } from 'react';
 import { DocumentSelector } from './DocumentSelector';
 import { ChatHistory } from './ChatHistory';
 import { QueryInput } from './QueryInput';
+import { PipelineStatusPanel } from './PipelineStatusPanel';
+import { QueryProvider, useQueryContext } from '../contexts/QueryContext';
 
-export function QueryPanel() {
+function QueryPanelInner() {
+  const { pipelineStages, retryCount, isQueryActive } = useQueryContext();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll pipeline panel into view when query becomes active
+  useEffect(() => {
+    if (isQueryActive && panelRef.current) {
+      panelRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isQueryActive]);
+
   return (
     <div className="h-full flex flex-col">
       {/* Header with Document Selector */}
@@ -15,11 +28,28 @@ export function QueryPanel() {
         <DocumentSelector />
       </div>
 
+      {/* Pipeline Status Panel */}
+      <div ref={panelRef}>
+        <PipelineStatusPanel
+          stages={pipelineStages}
+          retryCount={retryCount}
+          isVisible={isQueryActive}
+        />
+      </div>
+
       {/* Chat History */}
       <ChatHistory />
 
       {/* Query Input */}
       <QueryInput />
     </div>
+  );
+}
+
+export function QueryPanel() {
+  return (
+    <QueryProvider>
+      <QueryPanelInner />
+    </QueryProvider>
   );
 }

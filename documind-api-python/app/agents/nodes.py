@@ -202,7 +202,10 @@ async def grader_node(state: RAGState) -> dict:
             "retry_count": retry_count + 1,
         }
 
-    await _emit("grader", "Relevance check passed", f"score: {avg_score:.1f}/5")
+    if avg_score < 3:
+        await _emit("grader", "Relevance check passed", f"score: {avg_score:.1f}/5 (retries exhausted)")
+    else:
+        await _emit("grader", "Relevance check passed", f"score: {avg_score:.1f}/5")
     return {"relevance_scores": scores}
 
 

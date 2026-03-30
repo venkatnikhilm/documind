@@ -1,11 +1,11 @@
 import { useState, type KeyboardEvent, type ChangeEvent } from 'react';
-import { useQuery } from '../hooks/useQuery';
+import { useQueryContext } from '../contexts/QueryContext';
 import { useMessages } from '../contexts/MessageContext';
 import { useDocuments } from '../contexts/DocumentContext';
 
 export function QueryInput() {
   const [input, setInput] = useState('');
-  const { submitQuery } = useQuery();
+  const { submitQuery } = useQueryContext();
   const { isStreaming } = useMessages();
   const { documents } = useDocuments();
 
